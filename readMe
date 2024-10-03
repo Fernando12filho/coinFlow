@@ -1,0 +1,34 @@
+### Project Title: **Crypto Investment Tracker*
+### Name: CoinFlow
+
+
+### *Objective*:
+
+Develop a web application that enables users to track their Bitcoin investments by inputting the amount of Bitcoin purchased and the date of the transaction. The application will calculate individual gains or losses and display the overall performance of the portfolio, offering users a detailed view of their crypto investments. The unique feature is to show profits or losses for each individual investment rather than just the portfolio as a whole.
+
+---
+
+### *Key Features*:
+
+1. *User Authentication*:
+    - Users will be able to create accounts, log in, and securely manage their investment data.
+2. *Investment Input*:
+    - Users can input the date and quantity of Bitcoin purchased.
+3. *Price Tracking*:
+    - The app will fetch real-time Bitcoin prices using external APIs (e.g., CoinGecko, CoinMarketCap).
+4. *Profit/Loss Calculation*:
+    - For each investment, the app will calculate whether the investment has increased or decreased in value since the purchase date.
+5. *Overall Portfolio Performance*:
+    - In addition to tracking individual investments, the app will display the overall performance of the user’s entire portfolio.
+6. *Mobile-First Future*:
+    - While starting as a web application, the project will evolve into a mobile app.
+
+---
+
+### *Technology Stack*:
+
+- *Backend*: Flask (depending on final decision)
+- *Frontend*: React (for a future transition to React Native for mobile)
+- *Database*: SQLite3 to start, future move to MongoDB or PostgreSQL (to store user and investment data)
+- *APIs*: Crypto price API (CoinGecko or CoinMarketCap), current CoinCap
+- *Hosting/Deployment*: Cloud service (e.g., Heroku, AWS, or DigitalOcean)

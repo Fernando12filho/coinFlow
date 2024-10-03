@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block header %}
+<h1>{% block title %}Bom dia, {{g.user['username']}}{% endblock %}</h1>
+{% if g.user %}
+<a>New</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div id="investment-block">
+    <h2>Total Invested</h2>
+    <p>$amount invested</p>
+
+    <button onclick="addInput()">Add Investment</button>
+</div>
+<!--
+*Form block to input investment, currenty display set to none
+*Needs to change display on click in "Add Investment", and changed back to none
+after user submits it.
+-->
+<form style="display: none;" id="form-investment" action = "/create" method="post">
+    <label for="investment_amount">Investment Amount (in USD):</label>
+    <input type="number" id="investment_amount" name="investment_amount" step="0.01" min="0" required>
+    <br><br>
+    
+    <!-- Cryptocurrency Selection -->
+    <label for="crypto_type">Cryptocurrency:</label>
+    <select id="crypto_type" name="crypto_type" required>
+        <option value="bitcoin">Bitcoin</option>
+        <option value="ethereum">Ethereum</option>
+    </select>
+    <br><br>
+
+    <!-- Cryptocurrency price at the time -->
+    <label for="investment_amount">Cryptocurrency Amount (in USD):</label>
+    <input type="number" id="crypto_amount" name="crypto_amount" step="0.01" required>
+    <br><br>
+    
+    <!-- Purchase Date Input -->
+    <label for="purchase_date">Purchase Date:</label>
+    <input type="date" id="investment_date" name="investment_date" required>
+    <br><br>
+    
+    <!-- Submit Button -->
+    <button type="submit">Submit Investment</button>
+</form>
+<div id="transaction-history"></div>
+    <!--Coin invested, date, transaction id, amount invested in dollars, gains or loss-->
+    <p>here goes all transactions</p>
+    {% for investment in investments_made %}
+        <div id="investments made">
+            <p>{{investment['id']}}</p>
+            <p>{{investment['purchase_date']}}</p>
+            <p>{{investment['purchase_amount']}}</p>
+            <p>{{investment['purchase_price']}}</p>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+{% block script %}
+<script>
+    function addInput(){
+        console.log("inside addinput function")
+        const input = document.getElementById('form-investment');
+        if(input.style.display === 'none'){
+            input.style.display = 'block';
+            console.log("Display have changed to BLOCK");
+        }else{
+            input.style.display = 'none';
+            console.log("Display have changed to NONE")
+        }
+    }
+</script>
+{% endblock %}
+
