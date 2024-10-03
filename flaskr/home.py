@@ -48,7 +48,7 @@ def get_user_investments(user_id):
     cursor = db.cursor()
 
     query = '''
-    SELECT id, amount, purchase_date, purchase_price 
+    SELECT coin_name, id, amount, purchase_date, purchase_price 
     FROM investments 
     WHERE user_id = ?;
     '''
@@ -72,7 +72,8 @@ def index():
 def create_investment():
     print(g.user['id'])   
     print('Inside create route')
-    #investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
+    #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
+    coin_name = request.form['coin_name']
     investment_amount = request.form['investment_amount']
     crypto_amount = request.form['crypto_amount']
     investment_date = request.form['investment_date']
@@ -83,11 +84,12 @@ def create_investment():
     else:
         db = get_db()
         db.execute(
-            'INSERT INTO investments (user_id, amount, purchase_date, purchase_price)'
-            'VALUES (?, ?, ?, ?)',
-            (g.user['user_id'], crypto_amount, investment_date, investment_amount)
+            'INSERT INTO investments (user_id, coin_name, amount, purchase_date, purchase_price)'
+            'VALUES (?, ?, ?, ?, ?)',
+            (g.user['id'], coin_name, crypto_amount, investment_date, investment_amount)
         )
         db.commit()
         print('Investment added sucessfully')
-        return redirect(url_for(index))
+        print(coin_name)
+        return redirect(url_for('home.index'))
     

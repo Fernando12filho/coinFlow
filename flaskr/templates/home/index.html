@@ -2,9 +2,6 @@
 
 {% block header %}
 <h1>{% block title %}Bom dia, {{g.user['username']}}{% endblock %}</h1>
-{% if g.user %}
-<a>New</a>
-{% endif %}
 {% endblock %}
 
 {% block content %}
@@ -19,14 +16,14 @@
 *Needs to change display on click in "Add Investment", and changed back to none
 after user submits it.
 -->
-<form style="display: none;" id="form-investment" action = "/create" method="post">
+<form style="display: none;" id="form-investment" action="/create" method="post">
     <label for="investment_amount">Investment Amount (in USD):</label>
     <input type="number" id="investment_amount" name="investment_amount" step="0.01" min="0" required>
     <br><br>
-    
+
     <!-- Cryptocurrency Selection -->
-    <label for="crypto_type">Cryptocurrency:</label>
-    <select id="crypto_type" name="crypto_type" required>
+    <label for="coin_name">Cryptocurrency:</label>
+    <select id="coin_name" name="coin_name" required>
         <option value="bitcoin">Bitcoin</option>
         <option value="ethereum">Ethereum</option>
     </select>
@@ -36,41 +33,45 @@ after user submits it.
     <label for="investment_amount">Cryptocurrency Amount (in USD):</label>
     <input type="number" id="crypto_amount" name="crypto_amount" step="0.01" required>
     <br><br>
-    
+
     <!-- Purchase Date Input -->
     <label for="purchase_date">Purchase Date:</label>
     <input type="date" id="investment_date" name="investment_date" required>
     <br><br>
-    
+
     <!-- Submit Button -->
     <button type="submit">Submit Investment</button>
 </form>
 <div id="transaction-history"></div>
-    <!--Coin invested, date, transaction id, amount invested in dollars, gains or loss-->
-    <p>here goes all transactions</p>
-    {% for investment in investments_made %}
-        <div id="investments made">
-            <p>{{investment['id']}}</p>
-            <p>{{investment['purchase_date']}}</p>
-            <p>{{investment['purchase_amount']}}</p>
-            <p>{{investment['purchase_price']}}</p>
-        </div>
-    {% endfor %}
+<!--Coin invested, date, transaction id, amount invested in dollars, gains or loss-->
+<p>here goes all transactions</p>
+{% for investment in investments_made %}
+<div id="investments-made">
+    <p>{{investment['coin_name']}}</p>
+    <p>#id{{investment['id']}}</p>
+    <p>{{investment['purchase_date']}}</p>
+    <p>{{investment['amount']}}</p>
+    <p>${{investment['purchase_price']}}</p>
+    <div>
+        <button>delete</button>
+        <button>edit</button>
+    </div>
+</div>
+{% endfor %}
 </div>
 {% endblock %}
 {% block script %}
 <script>
-    function addInput(){
+    function addInput() {
         console.log("inside addinput function")
         const input = document.getElementById('form-investment');
-        if(input.style.display === 'none'){
+        if (input.style.display === 'none') {
             input.style.display = 'block';
             console.log("Display have changed to BLOCK");
-        }else{
+        } else {
             input.style.display = 'none';
             console.log("Display have changed to NONE")
         }
     }
 </script>
 {% endblock %}
-

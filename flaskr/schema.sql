@@ -12,6 +12,7 @@ CREATE TABLE user (
 CREATE TABLE investments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
+    coin_name INTEGER NOT NULL,
     amount DECIMAL(16, 8) NOT NULL,
     purchase_date DATE NOT NULL,
     purchase_price DECIMAL(16, 2) NOT NULL,
