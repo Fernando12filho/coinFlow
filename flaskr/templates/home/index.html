@@ -30,7 +30,7 @@ after user submits it.
     <br><br>
 
     <!-- Cryptocurrency price at the time -->
-    <label for="investment_amount">Cryptocurrency Amount (in USD):</label>
+    <label for="investment_amount">Cryptocurrency Amount:</label>
     <input type="number" id="crypto_amount" name="crypto_amount" step="0.01" required>
     <br><br>
 
@@ -47,14 +47,18 @@ after user submits it.
 <p>here goes all transactions</p>
 {% for investment in investments_made %}
 <div id="investments-made">
-    <p>{{investment['coin_name']}}</p>
+    <p id="coin_name">{{investment['coin_name']}}</p>
     <p>#id{{investment['id']}}</p>
-    <p>{{investment['purchase_date']}}</p>
-    <p>{{investment['amount']}}</p>
-    <p>${{investment['purchase_price']}}</p>
-    <div>
-        <button>delete</button>
-        <button>edit</button>
+    <p id="purchase_date">{{investment['purchase_date']}}</p>
+    <p id="amount">{{investment['amount']}}</p>
+    <p id="purchase_price">${{investment['purchase_price']}}</p>
+    <div id="delete-edit-investments-buttons">
+        <form action="{{url_for('home.delete_investment', id = investment['id'])}}" method="post">
+            <button onclick="return confirm('Are you sure?');">delete</button>
+        </form>
+        <form>
+            <button>edit</button>
+        </form>
     </div>
 </div>
 {% endfor %}

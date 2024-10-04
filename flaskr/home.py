@@ -70,6 +70,7 @@ def index():
     
 @bp.post('/create')
 def create_investment():
+    #TODO: It still do not accept the amount of decimals it should have. Need to be fixed
     print(g.user['id'])   
     print('Inside create route')
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
@@ -92,4 +93,24 @@ def create_investment():
         print('Investment added sucessfully')
         print(coin_name)
         return redirect(url_for('home.index'))
+  
+  
+@bp.post('/<int:id>/delete')
+def delete_investment(id):
+    #TODO: make sure the database is being properly updated
+    print(id)
+    db = get_db()
+    db.execute(
+        'DELETE FROM investments WHERE id = ?',
+        (id,)
+    )
+    db.commit()
+    print("inside delete function")
+    return redirect(url_for('home.index'))
     
+
+@bp.post('/update')
+def update_investment(id):
+    #TODO: finish the update function, think about how it can be properly set
+    print("inside update function")
+    return redirect(url_for('home.index'))

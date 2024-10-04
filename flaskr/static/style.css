@@ -28,3 +28,7 @@ input[type=submit] { align-self: start; min-width: 10em; }
     display: flex;
     justify-content: space-around;
 }
+
+#delete-edit-investments-buttons{
+    display: flex;
+}
