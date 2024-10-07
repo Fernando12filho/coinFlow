@@ -1,2 +1,21 @@
-venv/
-.env/
+# Virtual Environment
+myenv/
+
+# Python Compiled Files
+__pycache__/
+*.py[cod]
+
+# Environment Variables
+.env
+
+# Database Files
+*.sqlite3
+*.db
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+
+# IDE-specific Files (optional)
+.vscode/
+.idea/
