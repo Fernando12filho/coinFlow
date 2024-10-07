@@ -58,6 +58,14 @@ def get_user_investments(user_id):
 
     return investments
 
+def get_total_invested(investments):
+    total_investment = 0
+    
+    for inv in investments:
+        investment_amount = float(inv['purchase_price'])  
+        total_investment += investment_amount
+    return total_investment
+
 @bp.route('/')
 @login_required
 def index():
@@ -65,7 +73,9 @@ def index():
     if g.user:
         user_id = g.user['id']
         investments_made = get_user_investments(user_id)
-        return render_template('home/index.html', investments_made=investments_made) #here is where investments will be queried and sent to front end
+        total_invested = get_total_invested(investments_made)
+        print(total_invested)
+        return render_template('home/index.html', investments_made=investments_made, performance = total_invested) #here is where investments will be queried and sent to front end
     return redirect(url_for('auth.login'))
     
 @bp.post('/create')

@@ -7,7 +7,8 @@ CREATE TABLE user (
     password TEXT NOT NULL
 );
 
-
+'amount: cryptocurrency amount bought'
+'purchase_price: amount spent to buy certain amount of cryptocurrency'
 
 CREATE TABLE investments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
