@@ -8,7 +8,7 @@
 <div id="investment-block">
     <h2>Total Invested</h2>
     <p>${{performance}}</p>
-    <button onclick="addInput()">Add Investment</button>
+    <button id="addInvestmentButton" onclick="addInput()">Add Investment</button>
 </div>
 <!--
 *Form block to input investment, currenty display set to none
@@ -71,11 +71,14 @@ after user submits it.
     function addInput() {
         console.log("inside addinput function")
         const input = document.getElementById('form-investment');
+        const addInvestmentButton = document.getElementById('addInvestmentButton')
         if (input.style.display === 'none') {
             input.style.display = 'block';
+            addInvestmentButton.disabled = true;
             console.log("Display have changed to BLOCK");
         } else {
             input.style.display = 'none';
+            addInvestmentButton.disabled = false;
             console.log("Display have changed to NONE")
         }
     }
