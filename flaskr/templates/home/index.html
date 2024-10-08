@@ -54,6 +54,7 @@ after user submits it.
     <p id="purchase_date">{{investment['purchase_date']}}</p>
     <p id="amount">{{investment['amount']}}</p>
     <p id="purchase_price">${{investment['purchase_price']}}</p>
+    <p id="gain_losses">${{investment['profit_loss']}}</p>
     <div id="delete-edit-investments-buttons">
         <form action="{{url_for('home.delete_investment', id = investment['id'])}}" method="post">
             <button onclick="return confirm('Are you sure?');">delete</button>

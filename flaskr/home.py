@@ -40,7 +40,7 @@ def get_bitcoin_price():
             return data
         else:
             return None
-
+        
 #getting user investments
 def get_user_investments(user_id):
     # Assuming a connection to SQLite is already set up
@@ -48,25 +48,58 @@ def get_user_investments(user_id):
     cursor = db.cursor()
 
     query = '''
-    SELECT coin_name, id, amount, purchase_date, purchase_price 
+    SELECT coin_name, id, amount, purchase_date, purchase_price, profit_loss 
     FROM investments 
     WHERE user_id = ?
     ORDER BY purchase_date DESC;
     '''
     cursor.execute(query, (user_id,))
     investments = cursor.fetchall()
+    calculate_gain_losses(investments)
     db.close()
 
     return investments
 
 def get_total_invested(investments):
     total_investment = 0
-    
+      
     for inv in investments:
         investment_amount = float(inv['purchase_price'])  
         total_investment += investment_amount
+        
     return total_investment
 
+#calculate gain or loses according to updated bitcoin price
+#Calculate bitcoin price at the time user bought it: purchase_price / amount of bitcoin
+#After calculation, function it will update database
+def calculate_gain_losses(investments):
+    btc_price_data = get_bitcoin_price()
+    
+    if btc_price_data is not None:
+        current_btc_price = float(btc_price_data['data']['priceUsd'])  # Extracting the current price
+        print(current_btc_price)
+        # Open the database connection
+        db = get_db()  # Ensure you have a valid function that opens a connection
+        for inv in investments:
+            purchase_unit_price = inv['purchase_price'] / inv['amount']  # Purchase price per unit
+            profit_loss = (current_btc_price - purchase_unit_price) * inv['amount']  # Gain/Loss calculation
+            print("inside gain_losses for loop")
+            print("Purchase Unite Price: ", purchase_unit_price)
+            print("Profit or loss: ", profit_loss)
+            # Update the database with current price and profit/loss
+            db.execute(
+                '''
+                UPDATE investments 
+                SET profit_loss = ?
+                WHERE id = ? 
+                ''', 
+                (profit_loss, inv['id'],)
+            )
+            db.commit()  # Commit the changes after the loop
+        
+    else:
+        print("Error fetching Bitcoin price")
+        
 #sends all data needed to the frontend
 @bp.route('/')
 @login_required
@@ -74,6 +107,7 @@ def index():
     if g.user:
         user_id = g.user['id']
         investments_made = get_user_investments(user_id)
+        #calculate_gain_losses(investments_made)
         total_invested = get_total_invested(investments_made)
         print(total_invested)
         return render_template('home/index.html', investments_made=investments_made, performance = total_invested) #here is where investments will be queried and sent to front end
@@ -101,6 +135,7 @@ def create_investment():
             (g.user['id'], coin_name, crypto_amount, investment_date, investment_amount)
         )
         db.commit()
+        db.close()
         print('Investment added sucessfully')
         print(coin_name)
         return redirect(url_for('home.index'))
@@ -116,6 +151,7 @@ def delete_investment(id):
         (id,)
     )
     db.commit()
+    db.close()
     print("inside delete function")
     return redirect(url_for('home.index'))
     
