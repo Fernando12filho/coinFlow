@@ -50,7 +50,8 @@ def get_user_investments(user_id):
     query = '''
     SELECT coin_name, id, amount, purchase_date, purchase_price 
     FROM investments 
-    WHERE user_id = ?;
+    WHERE user_id = ?
+    ORDER BY purchase_date DESC;
     '''
     cursor.execute(query, (user_id,))
     investments = cursor.fetchall()
@@ -66,10 +67,10 @@ def get_total_invested(investments):
         total_investment += investment_amount
     return total_investment
 
+#sends all data needed to the frontend
 @bp.route('/')
 @login_required
-def index():
-    
+def index():   
     if g.user:
         user_id = g.user['id']
         investments_made = get_user_investments(user_id)
