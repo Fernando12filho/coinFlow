@@ -67,7 +67,9 @@ after user submits it.
             <td>{{investment['purchase_date']}}</td>
             <td>{{investment['amount']}}</td>
             <td>${{investment['purchase_price']}}</td>
-            <td>${{investment['profit_loss']}}</td>
+            <td class="profit-loss" data-profit="{{ investment['profit_loss'] }}">
+                ${{investment['profit_loss']}}
+            </td>
             <td>
                 <form action="{{url_for('home.delete_investment', id=investment['id'])}}" method="post" style="display:inline;">
                     <button onclick="return confirm('Are you sure?');">Delete</button>
@@ -98,5 +100,19 @@ after user submits it.
             console.log("Display have changed to NONE")
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const profitLossElements = document.querySelectorAll('.profit-loss');
+        
+        profitLossElements.forEach(function (element) {
+            const profitValue = parseFloat(element.getAttribute('data-profit'));
+            
+            if (profitValue >= 0) {
+                element.style.color = 'green';
+            } else {
+                element.style.color = 'red';
+            }
+        });
+    });
 </script>
 {% endblock %}
