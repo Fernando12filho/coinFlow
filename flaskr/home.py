@@ -33,14 +33,13 @@ api_key = os.getenv("API_KEY")
 def get_bitcoin_price():
         api_url = "https://api.coincap.io/v2/assets/bitcoin"
         headers = {"Authorization": f"Bearer {api_key}"}
-        response = requests.get(api_url, headers=headers)
-    
+        response = requests.get(api_url, headers=headers)   
         if response.status_code == 200:
             data = response.json()
             return data
         else:
             return None
-        
+      
 #getting user investments
 def get_user_investments(user_id):
     # Assuming a connection to SQLite is already set up
@@ -116,6 +115,8 @@ def index():
 @bp.post('/create')
 def create_investment():
     #TODO: It still do not accept the amount of decimals it should have. Need to be fixed
+    #TODO: Create investment is not calculating gains or losses directly, it adds the 
+    #investmentbut show gain/loss as 'None'
     print(g.user['id'])   
     print('Inside create route')
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
