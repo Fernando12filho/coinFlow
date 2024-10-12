@@ -83,9 +83,10 @@ def calculate_gain_losses(investments):
         for inv in investments:
             purchase_unit_price = inv['purchase_price'] / inv['amount']  # Purchase price per unit
             profit_loss = (current_btc_price - purchase_unit_price) * inv['amount']  # Gain/Loss calculation
+            profit_loss_formated = "{:.2f}".format(profit_loss)
             print("inside gain_losses for loop")
             print("Purchase Unite Price: ", purchase_unit_price)
-            print("Profit or loss: ", profit_loss)
+            print("Profit or loss: ", profit_loss_formated)
             # Update the database with current price and profit/loss
             db.execute(
                 '''
@@ -93,7 +94,7 @@ def calculate_gain_losses(investments):
                 SET profit_loss = ?
                 WHERE id = ? 
                 ''', 
-                (profit_loss, inv['id'],)
+                (profit_loss_formated, inv['id'],)
             )
             db.commit()  # Commit the changes after the loop
         

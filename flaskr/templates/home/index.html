@@ -46,25 +46,40 @@ after user submits it.
 </form>
 <div id="transaction-history"></div>
 <!--Coin invested, date, transaction id, amount invested in dollars, gains or loss-->
-<p>here goes all transactions</p>
-{% for investment in investments_made %}
-<div id="investments-made">
-    <p id="coin_name">{{investment['coin_name']}}</p>
-    <p>#id{{investment['id']}}</p>
-    <p id="purchase_date">{{investment['purchase_date']}}</p>
-    <p id="amount">{{investment['amount']}}</p>
-    <p id="purchase_price">${{investment['purchase_price']}}</p>
-    <p id="gain_losses">${{investment['profit_loss']}}</p>
-    <div id="delete-edit-investments-buttons">
-        <form action="{{url_for('home.delete_investment', id = investment['id'])}}" method="post">
-            <button onclick="return confirm('Are you sure?');">delete</button>
-        </form>
-        <form>
-            <button>edit</button>
-        </form>
-    </div>
-</div>
-{% endfor %}
+<p>Transaction History</p>
+<table>
+    <thead>
+        <tr>
+            <th>Coin Name</th>
+            <th>Transaction ID</th>
+            <th>Purchase Date</th>
+            <th>Amount</th>
+            <th>Purchase Price</th>
+            <th>Profit/Loss</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for investment in investments_made %}
+        <tr>
+            <td>{{investment['coin_name']}}</td>
+            <td>#{{investment['id']}}</td>
+            <td>{{investment['purchase_date']}}</td>
+            <td>{{investment['amount']}}</td>
+            <td>${{investment['purchase_price']}}</td>
+            <td>${{investment['profit_loss']}}</td>
+            <td>
+                <form action="{{url_for('home.delete_investment', id=investment['id'])}}" method="post" style="display:inline;">
+                    <button onclick="return confirm('Are you sure?');">Delete</button>
+                </form>
+                <form style="display:inline;">
+                    <button>Edit</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endblock %}
 {% block script %}
