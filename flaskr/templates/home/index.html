@@ -28,9 +28,9 @@ after user submits it.
     </select>
     <br><br>
 
-    <!-- Cryptocurrency price at the time -->
+    <!-- Cryptocurrency amount at the time -->
     <label for="investment_amount">Cryptocurrency Amount:</label>
-    <input type="number" id="crypto_amount" name="crypto_amount" step="0.01" required>
+    <input type="number" id="crypto_amount" name="crypto_amount" step="0.00000001" required>
     <br><br>
 
     <!-- Purchase Date Input -->
@@ -46,25 +46,42 @@ after user submits it.
 </form>
 <div id="transaction-history"></div>
 <!--Coin invested, date, transaction id, amount invested in dollars, gains or loss-->
-<p>here goes all transactions</p>
-{% for investment in investments_made %}
-<div id="investments-made">
-    <p id="coin_name">{{investment['coin_name']}}</p>
-    <p>#id{{investment['id']}}</p>
-    <p id="purchase_date">{{investment['purchase_date']}}</p>
-    <p id="amount">{{investment['amount']}}</p>
-    <p id="purchase_price">${{investment['purchase_price']}}</p>
-    <p id="gain_losses">${{investment['profit_loss']}}</p>
-    <div id="delete-edit-investments-buttons">
-        <form action="{{url_for('home.delete_investment', id = investment['id'])}}" method="post">
-            <button onclick="return confirm('Are you sure?');">delete</button>
-        </form>
-        <form>
-            <button>edit</button>
-        </form>
-    </div>
-</div>
-{% endfor %}
+<p>Transaction History</p>
+<table id="transactions-table">
+    <thead>
+        <tr>
+            <th>Coin Name</th>
+            <th>Transaction ID</th>
+            <th>Purchase Date</th>
+            <th>BTC Amount</th>
+            <th>Purchase Price</th>
+            <th>Profit/Loss</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for investment in investments_made %}
+        <tr>
+            <td>{{investment['coin_name']}}</td>
+            <td>#{{investment['id']}}</td>
+            <td>{{investment['purchase_date']}}</td>
+            <td>{{investment['amount']}}</td>
+            <td>${{investment['purchase_price']}}</td>
+            <td class="profit-loss" data-profit="{{ investment['profit_loss'] }}">
+                ${{investment['profit_loss']}}
+            </td>
+            <td>
+                <form action="{{url_for('home.delete_investment', id=investment['id'])}}" method="post" style="display:inline;">
+                    <button onclick="return confirm('Are you sure?');">Delete</button>
+                </form>
+                <form style="display:none;">
+                    <button>Edit</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 {% endblock %}
 {% block script %}
@@ -83,5 +100,19 @@ after user submits it.
             console.log("Display have changed to NONE")
         }
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const profitLossElements = document.querySelectorAll('.profit-loss');
+        
+        profitLossElements.forEach(function (element) {
+            const profitValue = parseFloat(element.getAttribute('data-profit'));
+            
+            if (profitValue >= 0) {
+                element.style.color = 'green';
+            } else {
+                element.style.color = 'red';
+            }
+        });
+    });
 </script>
 {% endblock %}

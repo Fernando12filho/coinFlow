@@ -11,20 +11,6 @@ from flaskr.db import get_db
 
 bp = Blueprint('home', __name__)
 
-#database
-'''
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    amount DECIMAL(16, 8) NOT NULL,
-    purchase_date DATE NOT NULL,
-    purchase_price DECIMAL(16, 2) NOT NULL,
-    current_price DECIMAL(16, 2),
-    profit_loss DECIMAL(16, 2),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
-    
-'''
-
 #loads api key
 load_dotenv()
 api_key = os.getenv("API_KEY")
@@ -65,8 +51,9 @@ def get_total_invested(investments):
     for inv in investments:
         investment_amount = float(inv['purchase_price'])  
         total_investment += investment_amount
+        total_investment_formatted = "{:.2f}".format(total_investment)
         
-    return total_investment
+    return total_investment_formatted
 
 #calculate gain or loses according to updated bitcoin price
 #Calculate bitcoin price at the time user bought it: purchase_price / amount of bitcoin
@@ -82,9 +69,10 @@ def calculate_gain_losses(investments):
         for inv in investments:
             purchase_unit_price = inv['purchase_price'] / inv['amount']  # Purchase price per unit
             profit_loss = (current_btc_price - purchase_unit_price) * inv['amount']  # Gain/Loss calculation
+            profit_loss_formated = "{:.2f}".format(profit_loss)
             print("inside gain_losses for loop")
             print("Purchase Unite Price: ", purchase_unit_price)
-            print("Profit or loss: ", profit_loss)
+            print("Profit or loss: ", profit_loss_formated)
             # Update the database with current price and profit/loss
             db.execute(
                 '''
@@ -92,7 +80,7 @@ def calculate_gain_losses(investments):
                 SET profit_loss = ?
                 WHERE id = ? 
                 ''', 
-                (profit_loss, inv['id'],)
+                (profit_loss_formated, inv['id'],)
             )
             db.commit()  # Commit the changes after the loop
         
@@ -114,9 +102,8 @@ def index():
     
 @bp.post('/create')
 def create_investment():
-    #TODO: It still do not accept the amount of decimals it should have. Need to be fixed
-    #TODO: Create investment is not calculating gains or losses directly, it adds the 
-    #investmentbut show gain/loss as 'None'
+
+    #TODO: Profit/loss calculates only after re-render
     print(g.user['id'])   
     print('Inside create route')
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
