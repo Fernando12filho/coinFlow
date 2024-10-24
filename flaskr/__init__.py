@@ -2,6 +2,7 @@ import os
 from flask import Flask
 import requests
 from dotenv import load_dotenv
+from flask_swagger_ui import get_swaggerui_blueprint
 """
 Oque falta ser feito:
     Criar 
@@ -14,6 +15,13 @@ def create_app(test_config = None):
         SECRET_KEY='dev',
         DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite')
     )
+    
+    # Swagger UI setup
+    SWAGGER_URL = '/swagger'  # URL for accessing the swagger UI
+    API_URL = '/static/swagger.json'  # Path to your API's swagger file (JSON)
+    swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "CoinFlow API"})
+    
+    app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
     
     @app.route('/myinvestments')
     def hello():

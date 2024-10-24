@@ -28,8 +28,8 @@ def get_bitcoin_price():
       
 #getting user investments
 def get_user_investments(user_id):
-    # Assuming a connection to SQLite is already set up
-    db = get_db()  # Example function to get DB connection
+
+    db = get_db() 
     cursor = db.cursor()
 
     query = '''
@@ -65,7 +65,7 @@ def calculate_gain_losses(investments):
         current_btc_price = float(btc_price_data['data']['priceUsd'])  # Extracting the current price
         print(current_btc_price)
         # Open the database connection
-        db = get_db()  # Ensure you have a valid function that opens a connection
+        db = get_db()  
         for inv in investments:
             purchase_unit_price = inv['purchase_price'] / inv['amount']  # Purchase price per unit
             profit_loss = (current_btc_price - purchase_unit_price) * inv['amount']  # Gain/Loss calculation
@@ -98,6 +98,17 @@ def index():
         total_invested = get_total_invested(investments_made)
         print(total_invested)
         return render_template('home/index.html', investments_made=investments_made, performance = total_invested) #here is where investments will be queried and sent to front end
+    return redirect(url_for('auth.login'))
+
+#route that takes user to its BRL transactions
+@bp.route('/brl')
+@login_required
+def index_brl():
+    if g.user:
+        user_id = g.user['id']
+        investments_made = get_user_investments(user_id)
+        total_invested = get_total_invested(investments_made)
+        return render_template('home/index_brl.html', investments_made=investments_made, performance=total_invested)
     return redirect(url_for('auth.login'))
     
 @bp.post('/create')

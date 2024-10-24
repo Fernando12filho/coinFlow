@@ -1,0 +1,204 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "CoinFlow API documentation",
+        "version": "1.0.0",
+        "title": "CoinFlow API"
+    },
+    "paths": {
+        "/auth/login": {
+            "post": {
+                "summary": "Login user",
+                "description": "User login endpoint",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Login successful"
+                    },
+                    "400": {
+                        "description": "Invalid input"
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "summary": "Register user",
+                "description": "User registration endpoint",
+                "parameters": [
+                    {
+                        "name": "username",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    },
+                    {
+                        "name": "password",
+                        "in": "formData",
+                        "required": true,
+                        "type": "string"
+                    }
+                ]
+            }
+        },
+        "/": {
+                        "get": {
+                            "summary": "Get user investments",
+                            "description": "Fetches the user's investments and displays them in the homepage.",
+                            "responses": {
+                                "200": {
+                                    "description": "User investments fetched successfully"
+                                },
+                                "401": {
+                                    "description": "Unauthorized - User not logged in"
+                                }
+                            }
+                        }
+                    },
+                    "/brl": {
+                        "get": {
+                            "summary": "Get user investments in BRL",
+                            "description": "Fetches the user's investments in Brazilian Real and displays them.",
+                            "responses": {
+                                "200": {
+                                    "description": "User BRL investments fetched successfully"
+                                },
+                                "401": {
+                                    "description": "Unauthorized - User not logged in"
+                                }
+                            }
+                        }
+                    },
+                    "/create": {
+                        "post": {
+                            "summary": "Create new investment",
+                            "description": "Creates a new investment entry for the logged-in user.",
+                            "parameters": [
+                                {
+                                    "name": "coin_name",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Name of the cryptocurrency"
+                                },
+                                {
+                                    "name": "investment_amount",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Amount invested"
+                                },
+                                {
+                                    "name": "crypto_amount",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Amount of cryptocurrency bought"
+                                },
+                                {
+                                    "name": "investment_date",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Date of the investment"
+                                }
+                            ],
+                            "responses": {
+                                "201": {
+                                    "description": "Investment created successfully"
+                                },
+                                "400": {
+                                    "description": "Invalid input"
+                                }
+                            }
+                        }
+                    },
+                    "/{id}/delete": {
+                        "post": {
+                            "summary": "Delete investment",
+                            "description": "Deletes an investment entry based on the investment ID.",
+                            "parameters": [
+                                {
+                                    "name": "id",
+                                    "in": "path",
+                                    "required": true,
+                                    "type": "integer",
+                                    "description": "ID of the investment to be deleted"
+                                }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "description": "Investment deleted successfully"
+                                },
+                                "404": {
+                                    "description": "Investment not found"
+                                }
+                            }
+                        }
+                    },
+                    "/update": {
+                        "post": {
+                            "summary": "Update investment",
+                            "description": "Updates an investment entry for the logged-in user.",
+                            "parameters": [
+                                {
+                                    "name": "id",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "integer",
+                                    "description": "ID of the investment to be updated"
+                                },
+                                {
+                                    "name": "coin_name",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Name of the cryptocurrency"
+                                },
+                                {
+                                    "name": "investment_amount",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Amount invested"
+                                },
+                                {
+                                    "name": "crypto_amount",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Amount of cryptocurrency bought"
+                                },
+                                {
+                                    "name": "investment_date",
+                                    "in": "formData",
+                                    "required": true,
+                                    "type": "string",
+                                    "description": "Date of the investment"
+                                }
+                            ],
+                            "responses": {
+                                "201": {
+                                    "description": "User created"
+                                },
+                                "400": {
+                                    "description": "Invalid input"
+                                }
+                            }
+                        }
+                    }
+                }
+            }

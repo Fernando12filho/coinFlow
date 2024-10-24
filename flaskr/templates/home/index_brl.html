@@ -3,9 +3,9 @@
 {% block header %}
 <div id="header-name-monetary">
     <h1>{% block title %}Good Morning, {{g.user['username']}}{% endblock %}</h1>
-    <p>Monetary system: USD</p>
-    <form style="display: none;" action="{{ url_for('home.index_brl') }}" method="get">
-        <button type="submit">Switch to BRL</button>
+    <p>Monetary system: BRL</p>
+    <form style="display: none;" action="{{ url_for('home.index') }}" method="get">
+        <button style="display: none;" type="submit">Switch to USD</button>
     </form>
 </div>
 {% endblock %}
@@ -13,7 +13,7 @@
 {% block content %}
 <div id="investment-block">
     <h2>Total Invested</h2>
-    <p>${{performance}}</p>
+    <p>R${{performance}}</p>
     <button id="addInvestmentButton" onclick="addInput()">Add Investment</button>
 </div>
 <!--
@@ -22,7 +22,7 @@
 after user submits it.
 -->
 <form style="display: none;" id="form-investment" action="/create" method="post">
-    <label for="investment_amount">Investment Amount (in USD):</label>
+    <label for="investment_amount">Investment Amount (in BRL):</label>
     <input type="number" id="investment_amount" name="investment_amount" step="0.01" min="0" required>
     <br><br>
 
@@ -72,9 +72,9 @@ after user submits it.
             <td>#{{investment['id']}}</td>
             <td>{{investment['purchase_date']}}</td>
             <td>{{investment['amount']}}</td>
-            <td>${{investment['purchase_price']}}</td>
+            <td>R${{investment['purchase_price']}}</td>
             <td class="profit-loss" data-profit="{{ investment['profit_loss'] }}">
-                ${{investment['profit_loss']}}
+                R${{investment['profit_loss']}}
             </td>
             <td>
                 <form action="{{url_for('home.delete_investment', id=investment['id'])}}" method="post" style="display:inline;">
