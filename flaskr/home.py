@@ -1,6 +1,6 @@
 import os
 from flask import (
-    Blueprint, flash, g, redirect, render_template, request, url_for
+    Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
 )
 import requests
 from dotenv import load_dotenv
@@ -88,17 +88,25 @@ def calculate_gain_losses(investments):
         print("Error fetching Bitcoin price")
         
 #sends all data needed to the frontend
-@bp.route('/')
-@login_required
-def index():   
+@bp.route('/', methods = ['GET'])
+def index():
+    print("inside index")   
     if g.user:
         user_id = g.user['id']
         investments_made = get_user_investments(user_id)
         #calculate_gain_losses(investments_made)
         total_invested = get_total_invested(investments_made)
         print(total_invested)
-        return render_template('home/index.html', investments_made=investments_made, performance = total_invested) #here is where investments will be queried and sent to front end
-    return redirect(url_for('auth.login'))
+        return jsonify({
+            "user": g.user['username'],
+            "investments": investments_made,
+            "total_invested": total_invested
+        }), 200 #here is where investments will be queried and sent to front end
+    return jsonify({"error": "User not logged in"}), 401
+
+@bp.route('/api/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "connected", "message": "API is reachable"}), 200
 
 #route that takes user to its BRL transactions
 @bp.route('/brl')
@@ -110,6 +118,8 @@ def index_brl():
         total_invested = get_total_invested(investments_made)
         return render_template('home/index_brl.html', investments_made=investments_made, performance=total_invested)
     return redirect(url_for('auth.login'))
+
+
     
 @bp.post('/create')
 def create_investment():
@@ -125,7 +135,7 @@ def create_investment():
     error = None
     
     if error is not None:
-        flash(error)
+        return jsonify({"success": False, "error": error}), 400
     else:
         db = get_db()
         db.execute(
@@ -137,7 +147,7 @@ def create_investment():
         db.close()
         print('Investment added sucessfully')
         print(coin_name)
-        return redirect(url_for('home.index'))
+        return jsonify({"success": True, "message": "Investment added successfully"}), 201
   
   
 @bp.post('/<int:id>/delete')
@@ -152,7 +162,7 @@ def delete_investment(id):
     db.commit()
     db.close()
     print("inside delete function")
-    return redirect(url_for('home.index'))
+    return jsonify({"success": True, "message": "Investment deleted"}), 200
     
 
 @bp.post('/update')
