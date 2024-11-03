@@ -1,34 +1,70 @@
-### Project Title: **Crypto Investment Tracker*
-### Name: CoinFlow
+### Backend (Flask)
 
+#### `README.md` for Backend
 
-### *Objective*:
+```markdown
+# CoinFlow - Backend
 
-Develop a web application that enables users to track their Bitcoin investments by inputting the amount of Bitcoin purchased and the date of the transaction. The application will calculate individual gains or losses and display the overall performance of the portfolio, offering users a detailed view of their crypto investments. The unique feature is to show profits or losses for each individual investment rather than just the portfolio as a whole.
+This repository contains the backend API for the CoinFlow application. It serves as the primary data provider for CoinFlow's frontend, handling user authentication, asset management, transaction history, and news feeds.
 
----
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [API Endpoints](#api-endpoints)
+- [Technologies](#technologies)
 
-### *Key Features*:
+## Installation
 
-1. *User Authentication*:
-    - Users will be able to create accounts, log in, and securely manage their investment data.
-2. *Investment Input*:
-    - Users can input the date and quantity of Bitcoin purchased.
-3. *Price Tracking*:
-    - The app will fetch real-time Bitcoin prices using external APIs (e.g., CoinGecko, CoinMarketCap).
-4. *Profit/Loss Calculation*:
-    - For each investment, the app will calculate whether the investment has increased or decreased in value since the purchase date.
-5. *Overall Portfolio Performance*:
-    - In addition to tracking individual investments, the app will display the overall performance of the user’s entire portfolio.
-6. *Mobile-First Future*:
-    - While starting as a web application, the project will evolve into a mobile app.
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd backend
+   ```
 
----
+2. **Create and activate a virtual environment**
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   ```
 
-### *Technology Stack*:
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-- *Backend*: Flask (depending on final decision)
-- *Frontend*: React (for a future transition to React Native for mobile)
-- *Database*: SQLite3 to start, future move to MongoDB or PostgreSQL (to store user and investment data)
-- *APIs*: Crypto price API (CoinGecko or CoinMarketCap), current CoinCap
-- *Hosting/Deployment*: Cloud service (e.g., Heroku, AWS, or DigitalOcean)
+4. **Run the application**
+   ```bash
+   flask run
+   ```
+
+The backend API will start on `http://127.0.0.1:5000`.
+
+### Configuration
+
+Ensure CORS is enabled in `__init__.py` for smooth communication between the frontend and backend. You may update the allowed origins as per your requirements.
+
+## Usage
+
+The backend provides several endpoints for:
+- User session management (login, signup)
+- Retrieving and managing assets and transactions
+- Displaying news and market data
+
+## API Endpoints
+
+Here is an overview of the key endpoints:
+
+| Endpoint                  | Method | Description                              |
+|---------------------------|--------|------------------------------------------|
+| `/api/user/login`         | POST   | Logs in a user                           |
+| `/api/user/register`      | POST   | Registers a new user                     |
+| `/api/user/session`       | GET    | Verifies user session                    |
+| `/api/user/investments`   | GET    | Retrieves user’s investment details      |
+| `/api/news`               | GET    | Fetches real-time news and market trends |
+
+## Technologies
+
+- Flask
+- Flask-CORS
+- SQLite3 (or your chosen database)
+```
