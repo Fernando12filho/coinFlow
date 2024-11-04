@@ -124,8 +124,7 @@ def index_brl():
 @bp.post('/create')
 def create_investment():
 
-    #TODO: Profit/loss calculates only after re-render
-    print(g.user['id'])   
+    #TODO: Profit/loss calculates only after re-render  
     print('Inside create route')
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
     coin_name = request.form['coin_name']

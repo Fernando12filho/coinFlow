@@ -8,7 +8,7 @@ from flask_cors import CORS
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
-@bp.before_app_request
+#@bp.before_app_request
 def load_logged_in_user():
     user_id = session.get('user_id')
     if user_id is None:
@@ -51,8 +51,9 @@ def login():
 def register(): 
     print("inside register route")
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        data = request.json
+        username = data['username']
+        password = data['password']
         db = get_db()
         error = None
         
@@ -69,12 +70,13 @@ def register():
                 )
                 db.commit()
             except db.IntegrityError:
-                error = f"User {username} is already registered"
+                return jsonify({"success": False, "error": error}), 400
             else:
-                return redirect(url_for("auth.login"))
+                return jsonify({"success": True, "message": "Registration complete"})
             
-        flash(error)
-    return render_template('auth/register.html')
+        return jsonify({"success": False, "error": "Not Registered"}), 400
+    else:
+        return jsonify({"success": False, "error": "Method not allowed"})
 
 @bp.route('/logout')
 def logout():
