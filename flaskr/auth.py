@@ -8,12 +8,15 @@ from flask_cors import CORS
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
-#@bp.before_app_request
+@bp.before_app_request
 def load_logged_in_user():
+    print("inside load logged in user, session user id is: #", session.get('user_id'))
     user_id = session.get('user_id')
     if user_id is None:
+        print("g.user set to none")
         g.user = None
     else:
+        print("g.user succesfully set")
         g.user = get_db().execute(
             'SELECT * FROM user WHERE id = ?', (user_id,)
         ).fetchone()
@@ -40,7 +43,16 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
-            return jsonify({"success": True, "message": "Logged in successfully"}), 200
+            print("User id set to: ", session.get('user_id'))
+            return jsonify({
+                "success": True,
+                "message": "Logged in successfully",
+                "user": {
+                    "id": user['id'],
+                    "username": user['username'],
+                    # You can add any additional user fields here if needed
+                }
+            }), 200
 
         return jsonify({"success": False, "error": error}), 400
     if request.method == 'OPTIONS':

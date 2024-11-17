@@ -6,7 +6,7 @@ import requests
 from dotenv import load_dotenv
 from werkzeug.exceptions import abort
 
-from flaskr.auth import login_required
+from flaskr.auth import login_required, load_logged_in_user
 from flaskr.db import get_db
 
 bp = Blueprint('home', __name__)
@@ -40,6 +40,8 @@ def get_user_investments(user_id):
     '''
     cursor.execute(query, (user_id,))
     investments = cursor.fetchall()
+    
+    investments = [dict(row) for row in investments]
     calculate_gain_losses(investments)
     db.close()
 
@@ -88,12 +90,12 @@ def calculate_gain_losses(investments):
         print("Error fetching Bitcoin price")
         
 #sends all data needed to the frontend
-@bp.route('/', methods = ['GET'])
+@bp.get('/')
 def index():
     print("inside index")   
     if g.user:
         user_id = g.user['id']
-        investments_made = get_user_investments(user_id)
+        investments_made = [dict(row) for row in get_user_investments(user_id)]
         #calculate_gain_losses(investments_made)
         total_invested = get_total_invested(investments_made)
         print(total_invested)
