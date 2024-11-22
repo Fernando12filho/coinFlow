@@ -1,8 +1,11 @@
 # Virtual Environment
 myenv/
+myenv/Lib
+myenv/Scripts
+myenv/pyenv.cfg
 
 # Python Compiled Files
-__pycache__/
+flaskr/__pycache__/
 *.py[cod]
 
 # Environment Variables
