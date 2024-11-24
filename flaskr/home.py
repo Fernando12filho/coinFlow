@@ -55,7 +55,7 @@ def get_total_invested(investments):
         total_investment += investment_amount
         total_investment_formatted = "{:.2f}".format(total_investment)
         
-    return total_investment_formatted
+    return total_investment
 
 #calculate gain or loses according to updated bitcoin price
 #Calculate bitcoin price at the time user bought it: purchase_price / amount of bitcoin
@@ -89,6 +89,21 @@ def calculate_gain_losses(investments):
     else:
         print("Error fetching Bitcoin price")
         
+# Set current investments value
+def calculate_investments_value(investments):
+    total_invested_value = get_total_invested(investments)
+    for inv in investments:
+        total_invested_value = total_invested_value + inv['profit_loss']
+    print("total invested value is: ", total_invested_value)
+    return total_invested_value
+    
+def calculate_btc_amount(investments):
+    total_btc_amount = 0
+    for inv in investments:
+        total_btc_amount = total_btc_amount + inv['amount'] 
+    print("total amount of bitcoin: ", total_btc_amount) 
+    return total_btc_amount   
+
 #sends all data needed to the frontend
 @bp.get('/')
 def index():
@@ -98,11 +113,15 @@ def index():
         investments_made = [dict(row) for row in get_user_investments(user_id)]
         #calculate_gain_losses(investments_made)
         total_invested = get_total_invested(investments_made)
+        total_investment_value = calculate_investments_value(investments_made)
+        total_btc_amount = calculate_btc_amount(investments_made)
         print(total_invested)
         return jsonify({
             "user": g.user['username'],
             "investments": investments_made,
-            "total_invested": total_invested
+            "total_invested": total_invested,
+            "total_investment_value": total_investment_value,
+            "total_btc_amount": total_btc_amount
         }), 200 #here is where investments will be queried and sent to front end
     return jsonify({"error": "User not logged in"}), 401
 

@@ -35,7 +35,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\fgmel\OneDrive\Área de Trabalho\Fernando\projects\CoinFlow\myenv"
+VIRTUAL_ENV="C:\Users\fgmel\OneDrive\Área de Trabalho\Fernando\projects\CoinFlow\coinFlow\myenv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
