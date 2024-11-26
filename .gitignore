@@ -1,6 +1,8 @@
 # Virtual Environment
 myenv/
 
+flask.sqlite
+
 # Python Compiled Files
 __pycache__/
 *.py[cod]
