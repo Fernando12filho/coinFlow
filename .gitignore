@@ -1,10 +1,12 @@
 # Virtual Environment
 myenv/
+git 
+flask.sqlite
 
 flask.sqlite
 
 # Python Compiled Files
-__pycache__/
+flaskr/__pycache__/
 *.py[cod]
 
 # Environment Variables
