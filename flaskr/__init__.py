@@ -1,8 +1,9 @@
 import os
-from flask import Flask
+from flask import Flask, g, jsonify
 import requests
 from dotenv import load_dotenv
 from flask_swagger_ui import get_swaggerui_blueprint
+from flask_cors import CORS
 """
 Oque falta ser feito:
     Criar 
@@ -11,6 +12,7 @@ Oque falta ser feito:
 
 def create_app(test_config = None):
     app = Flask(__name__, instance_relative_config=True)
+    CORS(app, supports_credentials=True)
     app.config.from_mapping(
         SECRET_KEY='dev',
         DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite')
@@ -26,6 +28,7 @@ def create_app(test_config = None):
     @app.route('/myinvestments')
     def hello():
         return "home page"
+    
     
     @app.route('/addInvestments')
     def add_investments():
