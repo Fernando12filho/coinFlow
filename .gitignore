@@ -1,11 +1,10 @@
 # Virtual Environment
 myenv/
-myenv/Lib
-myenv/Scripts
-myenv/pyenv.cfg
+git 
+flask.sqlite
 
 # Python Compiled Files
-flaskr/__pycache__/
+__pycache__/
 *.py[cod]
 
 # Environment Variables
