@@ -2,12 +2,12 @@ import os
 from flask import (
     Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
 )
-import requests
 from dotenv import load_dotenv
 from werkzeug.exceptions import abort
-
 from flaskr.auth import login_required, load_logged_in_user
 from flaskr.db import get_db
+from flask import request
+import requests
 
 bp = Blueprint('home', __name__)
 
@@ -28,7 +28,6 @@ def get_bitcoin_price():
       
 #getting user investments
 def get_user_investments(user_id):
-
     db = get_db() 
     cursor = db.cursor()
 
@@ -96,7 +95,8 @@ def calculate_investments_value(investments):
         total_invested_value = total_invested_value + inv['profit_loss']
     print("total invested value is: ", total_invested_value)
     return total_invested_value
-    
+   
+# set total amount of bitcoin user has 
 def calculate_btc_amount(investments):
     total_btc_amount = 0
     for inv in investments:
@@ -147,14 +147,16 @@ def create_investment():
 
     #TODO: Profit/loss calculates only after re-render  
     print('Inside create route')
+    data = requests.json
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
-    coin_name = request.form['coin_name']
-    investment_amount = request.form['investment_amount']
-    crypto_amount = request.form['crypto_amount']
-    investment_date = request.form['investment_date']
+    coin_name = data['coin_name']
+    investment_amount = data['investment_amount']
+    crypto_amount = data['crypto_amount']
+    investment_date = data['investment_date']
     error = None
     
     if error is not None:
+        print(error)
         return jsonify({"success": False, "error": error}), 400
     else:
         db = get_db()
@@ -172,16 +174,23 @@ def create_investment():
   
 @bp.post('/<int:id>/delete')
 def delete_investment(id):
-    #TODO: make sure the database is being properly updated
-    print(id)
+    print("transaction id to be deleted is", id)
     db = get_db()
+    investment = db.execute(
+        'SELECT * FROM investments WHERE id = ?',
+        (id,)
+    ).fetchone()
+
+    if investment is None:
+        return jsonify({"success": False, "message": "Investment not found"}), 404
+
     db.execute(
         'DELETE FROM investments WHERE id = ?',
         (id,)
     )
     db.commit()
     db.close()
-    print("inside delete function")
+    print(f"Deleted investment with ID: {id}")
     return jsonify({"success": True, "message": "Investment deleted"}), 200
     
 
@@ -190,3 +199,27 @@ def update_investment(id):
     #TODO: finish the update function, think about how it can be properly set
     print("inside update function")
     return redirect(url_for('home.index'))
+
+
+@bp.route("/api/crypto-prices", methods=["GET"])
+def get_crypto_prices():
+    url = "https://api.coingecko.com/api/v3/coins/markets"
+    params = {
+        "vs_currency": "usd",
+        "ids": "bitcoin,ethereum,solana",
+        "order": "market_cap_desc",
+        "per_page": 3,
+        "page": 1,
+        "sparkline": False,
+    }
+    response = requests.get(url, params=params)
+    return jsonify(response.json())
+
+@bp.route("/api/news", methods=["GET"])
+def get_crypto_news():
+    url = ""
+    params = {
+        
+    }
+    response = requests.get(url, params=params)
+    return jsonify(response.json)
