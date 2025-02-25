@@ -1,30 +1,26 @@
 import os
-from flask import Flask, g, jsonify
-from dotenv import load_dotenv
+from flask import Flask
 from flask_cors import CORS
+from dotenv import load_dotenv
+
+load_dotenv()
+
 """
 Oque falta ser feito:
     Criar 
     Adicionar templates
 """
 
+secret_key = os.getenv("SECRET_KEY")
+
 def create_app(test_config = None):
     app = Flask(__name__, instance_relative_config=True)
     CORS(app, supports_credentials=True)
     app.config.from_mapping(
-        SECRET_KEY='dev',
+        SECRET_KEY=secret_key,
         DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite')
     )
     
-    
-    @app.route('/myinvestments')
-    def hello():
-        return "home page"
-    
-    
-    @app.route('/addInvestments')
-    def add_investments():
-        return "adding nothing yet"
     
     from . import db
     db.init_app(app)

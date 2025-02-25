@@ -9,6 +9,7 @@ from flaskr.db import get_db
 from flask import request
 import requests
 
+
 bp = Blueprint('home', __name__)
 
 #loads api key
@@ -147,7 +148,7 @@ def create_investment():
 
     #TODO: Profit/loss calculates only after re-render  
     print('Inside create route')
-    data = requests.json
+    data = request.json
     #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
     coin_name = data['coin_name']
     investment_amount = data['investment_amount']
