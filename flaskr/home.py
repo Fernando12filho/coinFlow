@@ -4,10 +4,11 @@ from flask import (
 )
 from dotenv import load_dotenv
 from werkzeug.exceptions import abort
-from flaskr.auth import login_required, load_logged_in_user
+from flaskr.auth import login_required, refresh
 from flaskr.db import get_db
 from flask import request
 import requests
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
 bp = Blueprint('home', __name__)
@@ -107,24 +108,25 @@ def calculate_btc_amount(investments):
 
 #sends all data needed to the frontend
 @bp.get('/')
-def index():
-    print("inside index")   
-    if g.user:
-        user_id = g.user['id']
-        investments_made = [dict(row) for row in get_user_investments(user_id)]
-        #calculate_gain_losses(investments_made)
-        total_invested = get_total_invested(investments_made)
-        total_investment_value = calculate_investments_value(investments_made)
-        total_btc_amount = calculate_btc_amount(investments_made)
-        print(total_invested)
-        return jsonify({
-            "user": g.user['username'],
-            "investments": investments_made,
-            "total_invested": total_invested,
-            "total_investment_value": total_investment_value,
-            "total_btc_amount": total_btc_amount
-        }), 200 #here is where investments will be queried and sent to front end
-    return jsonify({"error": "User not logged in"}), 401
+@jwt_required()
+def index(): 
+    print("inside index route")
+    current_user = get_jwt_identity()     
+    user_id = current_user
+    investments_made = [dict(row) for row in get_user_investments(user_id)]
+    #calculate_gain_losses(investments_made)
+    total_invested = get_total_invested(investments_made)
+    total_investment_value = calculate_investments_value(investments_made)
+    total_btc_amount = calculate_btc_amount(investments_made)
+    print(total_invested)
+    return jsonify({
+        "user": current_user,
+        "investments": investments_made,
+        "total_invested": total_invested,
+        "total_investment_value": total_investment_value,
+        "total_btc_amount": total_btc_amount
+    }), 200 #here is where investments will be queried and sent to front end
+    
 
 @bp.route('/api/health', methods=['GET'])
 def health_check():

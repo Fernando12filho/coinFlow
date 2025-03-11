@@ -5,27 +5,16 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_cors import CORS
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, create_refresh_token
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
-@bp.before_app_request
-def load_logged_in_user():
-    print("inside load logged in user, session user id is: #", session.get('user_id'))
-    user_id = session.get('user_id')
-    if user_id is None:
-        print("g.user set to none")
-        g.user = None
-    else:
-        print("g.user succesfully set")
-        g.user = get_db().execute(
-            'SELECT * FROM user WHERE id = ?', (user_id,)
-        ).fetchone()
+
         
 @bp.route('/login', methods=['POST', 'OPTIONS'])
 def login():
-    print("inside login")
+
     if request.method == 'POST':
-        print("inside post method")
         data = request.json
         username = data['username']
         password = data['password']
@@ -43,15 +32,22 @@ def login():
         if error is None:
             session.clear()
             session['user_id'] = user['id']
+            
             print("User id set to: ", session.get('user_id'))
+            access_token = create_access_token(identity=username)
+            refresh_token = create_refresh_token(identity=username)
+            response = jsonify({"msg": "logout successful"})
+            response.set_cookie(
+                'access_token', 
+                httponly=True,
+                secure=False, 
+                samesite='None'
+            )
+            set_access_cookies(response, access_token)
+            set_refresh_cookies(response, refresh_token)
             return jsonify({
-                "success": True,
-                "message": "Logged in successfully",
-                "user": {
-                    "id": user['id'],
-                    "username": user['username'],
-                    # You can add any additional user fields here if needed
-                }
+                'access_token': access_token,
+                'refresh_token': refresh_token
             }), 200
 
         return jsonify({"success": False, "error": error}), 400
@@ -90,10 +86,18 @@ def register():
     else:
         return jsonify({"success": False, "error": "Method not allowed"})
 
-@bp.route('/logout')
+@bp.post('/logout')
 def logout():
     session.clear()
     return jsonify({"success": True, "message": "Logged out successfully"}), 200
+
+
+@bp.route('/refresh', methods=['GET'])
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    new_access_token = create_access_token(identity=identity)
+    return jsonify({'access_token': new_access_token})
 
 def login_required(view):
     @functools.wraps(view)

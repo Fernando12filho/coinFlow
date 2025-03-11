@@ -2,14 +2,10 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from dotenv import load_dotenv
+from flask_jwt_extended import JWTManager
 
 load_dotenv()
 
-"""
-Oque falta ser feito:
-    Criar 
-    Adicionar templates
-"""
 
 secret_key = os.getenv("SECRET_KEY")
 
@@ -18,10 +14,13 @@ def create_app(test_config = None):
     CORS(app, supports_credentials=True)
     app.config.from_mapping(
         SECRET_KEY=secret_key,
-        DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite')
+        DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite'),
+        jwt_secret_key = os.getenv(secret_key),           
     )
     
+    jwt = JWTManager(app)
     
+    jwt
     from . import db
     db.init_app(app)
     
