@@ -30,13 +30,12 @@ def login():
             error = 'Incorrect password.'
 
         if error is None:
-            session.clear()
-            session['user_id'] = user['id']
             
-            print("User id set to: ", session.get('user_id'))
-            access_token = create_access_token(identity=username)
-            refresh_token = create_refresh_token(identity=username)
-            response = jsonify({"msg": "logout successful"})
+            user_id = str(user['id'])
+        
+            access_token = create_access_token(identity=user_id)
+            refresh_token = create_refresh_token(identity=user_id)
+            response = jsonify({"msg": "login successful"})
             response.set_cookie(
                 'access_token', 
                 httponly=True,

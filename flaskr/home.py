@@ -1,6 +1,6 @@
 import os
 from flask import (
-    Blueprint, flash, g, jsonify, redirect, render_template, request, url_for
+    Blueprint, flash, g, jsonify, redirect, render_template, request, url_for, session
 )
 from dotenv import load_dotenv
 from werkzeug.exceptions import abort
@@ -29,10 +29,11 @@ def get_bitcoin_price():
             return None
       
 #getting user investments
+@jwt_required()
 def get_user_investments(user_id):
+    print("user id is:", user_id)
     db = get_db() 
     cursor = db.cursor()
-
     query = '''
     SELECT coin_name, id, amount, purchase_date, purchase_price, profit_loss 
     FROM investments 
@@ -41,6 +42,7 @@ def get_user_investments(user_id):
     '''
     cursor.execute(query, (user_id,))
     investments = cursor.fetchall()
+    print(investments)
     
     investments = [dict(row) for row in investments]
     calculate_gain_losses(investments)
@@ -66,7 +68,7 @@ def calculate_gain_losses(investments):
     
     if btc_price_data is not None:
         current_btc_price = float(btc_price_data['data']['priceUsd'])  # Extracting the current price
-        print(current_btc_price)
+        # print(current_btc_price)
         # Open the database connection
         db = get_db()  
         for inv in investments:
@@ -112,8 +114,7 @@ def calculate_btc_amount(investments):
 def index(): 
     print("inside index route")
     current_user = get_jwt_identity()     
-    user_id = current_user
-    investments_made = [dict(row) for row in get_user_investments(user_id)]
+    investments_made = [dict(row) for row in get_user_investments(current_user)]
     #calculate_gain_losses(investments_made)
     total_invested = get_total_invested(investments_made)
     total_investment_value = calculate_investments_value(investments_made)
@@ -146,6 +147,7 @@ def index_brl():
 
     
 @bp.post('/create')
+@jwt_required()
 def create_investment():
 
     #TODO: Profit/loss calculates only after re-render  
@@ -157,6 +159,8 @@ def create_investment():
     crypto_amount = data['crypto_amount']
     investment_date = data['investment_date']
     error = None
+    user = get_jwt_identity()
+    
     
     if error is not None:
         print(error)
@@ -166,7 +170,7 @@ def create_investment():
         db.execute(
             'INSERT INTO investments (user_id, coin_name, amount, purchase_date, purchase_price)'
             'VALUES (?, ?, ?, ?, ?)',
-            (g.user['id'], coin_name, crypto_amount, investment_date, investment_amount)
+            (user, coin_name, crypto_amount, investment_date, investment_amount)
         )
         db.commit()
         db.close()
@@ -175,17 +179,11 @@ def create_investment():
         return jsonify({"success": True, "message": "Investment added successfully"}), 201
   
   
-@bp.post('/<int:id>/delete')
+@bp.route('/delete/<int:id>', methods=["DELETE", "OPTIONS"])
+@jwt_required()
 def delete_investment(id):
     print("transaction id to be deleted is", id)
     db = get_db()
-    investment = db.execute(
-        'SELECT * FROM investments WHERE id = ?',
-        (id,)
-    ).fetchone()
-
-    if investment is None:
-        return jsonify({"success": False, "message": "Investment not found"}), 404
 
     db.execute(
         'DELETE FROM investments WHERE id = ?',
