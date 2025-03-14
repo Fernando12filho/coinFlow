@@ -15,7 +15,11 @@ def create_app(test_config = None):
     app.config.from_mapping(
         SECRET_KEY=secret_key,
         DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite'),
-        jwt_secret_key = os.getenv(secret_key),           
+        JWT_SECRET_KEY = secret_key,  
+        JWT_TOKEN_LOCATION = ['cookies'], 
+        JWT_COOKIE_SECURE = True,
+        JWT_COOKIE_SAMESITE = 'None', 
+        JWT_COOKIE_CSRF_PROTECT = False         
     )
     
     jwt = JWTManager(app)

@@ -5,7 +5,7 @@ from flask import (
 from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_cors import CORS
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, create_refresh_token
+from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, create_refresh_token, unset_jwt_cookies
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
@@ -23,35 +23,45 @@ def login():
         user = db.execute(
             'SELECT * FROM user WHERE username = ?', (username,)
         ).fetchone()
+
         print("Inside login")
+
         if user is None:
             error = 'Incorrect username.'
         elif not check_password_hash(user['password'], password):
             error = 'Incorrect password.'
 
         if error is None:
-            
             user_id = str(user['id'])
-        
+            print("user id is: ", user_id)
             access_token = create_access_token(identity=user_id)
             refresh_token = create_refresh_token(identity=user_id)
-            response = jsonify({"msg": "login successful"})
+
+            # ✅ Prepare response (return the same one!)
+            response = jsonify({
+                "msg": "login successful",
+                "access_token": access_token,  # optional if you return access token in JSON
+                "refresh_token": refresh_token # optional if you return refresh token in JSON
+            })
+
+            # ✅ Set JWT cookies (both access and refresh)
             response.set_cookie(
-                'access_token', 
+                'refresh_token',
+                refresh_token,
                 httponly=True,
-                secure=False, 
-                samesite='None'
+                secure=True,             # False in dev (must be True in production)
+                samesite='None'           # None if cross-site (React on localhost:3000)
             )
             set_access_cookies(response, access_token)
-            set_refresh_cookies(response, refresh_token)
-            return jsonify({
-                'access_token': access_token,
-                'refresh_token': refresh_token
-            }), 200
+            # set_refresh_cookies(response, refresh_token)
+
+            return response, 200
 
         return jsonify({"success": False, "error": error}), 400
+
     if request.method == 'OPTIONS':
-        return jsonify({"message": "Preflight request"}), 200 
+        return jsonify({"message": "Preflight request"}), 200
+
     return jsonify({"logedin": False})
 
 @bp.route('/register', methods=['GET', 'POST'])
@@ -87,16 +97,29 @@ def register():
 
 @bp.post('/logout')
 def logout():
+    resp = jsonify({"success": True, "message": "Logged out successfully"})
+    unset_jwt_cookies(resp)
     session.clear()
-    return jsonify({"success": True, "message": "Logged out successfully"}), 200
+    return resp, 200
 
 
 @bp.route('/refresh', methods=['GET'])
-@jwt_required(refresh=True)
+@jwt_required()
 def refresh():
+    print("inside refresh")
     identity = get_jwt_identity()
     new_access_token = create_access_token(identity=identity)
-    return jsonify({'access_token': new_access_token})
+    
+    response = jsonify({
+        "msg": "login successful",
+        "access_token": new_access_token,  # optional if you return access token in JSON
+    })
+    
+    set_access_cookies(response, new_access_token)
+    # set_refresh_cookies(response, refresh_token)
+    return response, 200
+    
+    
 
 def login_required(view):
     @functools.wraps(view)
@@ -107,6 +130,5 @@ def login_required(view):
         return view(**kwargs)
 
     return wrapped_view
-
 
     
