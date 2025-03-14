@@ -1,7 +1,7 @@
 # Virtual Environment
 myenv/
 git 
-flask.sqlite
+flaskr.sqlite
 
 flask.sqlite
 
