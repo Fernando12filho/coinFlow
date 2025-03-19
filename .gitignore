@@ -4,7 +4,7 @@ git
 flaskr.sqlite
 
 flask.sqlite
-
+.sqlite
 # Python Compiled Files
 flaskr/__pycache__/
 *.py[cod]
