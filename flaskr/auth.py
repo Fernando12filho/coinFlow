@@ -6,6 +6,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, create_refresh_token, unset_jwt_cookies
+from email_validator import validate_email, EmailNotValidError
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
@@ -26,36 +27,42 @@ def login():
 
         print("Inside login")
 
-        if user is None:
-            error = 'Incorrect username.'
-        elif not check_password_hash(user['password'], password):
-            error = 'Incorrect password.'
+        if user is None or not check_password_hash(user['password'], password):
+            error = 'Incorrect username or password.'
+            return jsonify({"success": False, "error": error}), 400
+             
+        
+        user_id = str(user['id'])
+        print("user id is: ", user_id)
+        access_token = create_access_token(identity=user_id)
+        refresh_token = create_refresh_token(identity=user_id)
 
-        if error is None:
-            user_id = str(user['id'])
-            print("user id is: ", user_id)
-            access_token = create_access_token(identity=user_id)
-            refresh_token = create_refresh_token(identity=user_id)
+         # ✅ Prepare response (return the same one!)
+        response = jsonify({
+        "msg": "login successful",
+        "access_token": access_token,  # optional if you return access token in JSON
+        "refresh_token": refresh_token, # optional if you return refresh token in JSON
+        "user": {
+                "id": user['id'],
+                "username": user['username'],
+                "email": user['email'],
+                # is_subscribed
+                "isSubscribed": user['isSubscribed']                  
+            }
+        })
 
-            # ✅ Prepare response (return the same one!)
-            response = jsonify({
-                "msg": "login successful",
-                "access_token": access_token,  # optional if you return access token in JSON
-                "refresh_token": refresh_token # optional if you return refresh token in JSON
-            })
+        # ✅ Set JWT cookies (both access and refresh)
+        response.set_cookie(
+            'refresh_token',
+            refresh_token,
+            httponly=True,
+            secure=True,             # False in dev (must be True in production)
+            samesite='None'           # None if cross-site (React on localhost:3000)
+        )
+        set_access_cookies(response, access_token)
+        # set_refresh_cookies(response, refresh_token)
 
-            # ✅ Set JWT cookies (both access and refresh)
-            response.set_cookie(
-                'refresh_token',
-                refresh_token,
-                httponly=True,
-                secure=True,             # False in dev (must be True in production)
-                samesite='None'           # None if cross-site (React on localhost:3000)
-            )
-            set_access_cookies(response, access_token)
-            # set_refresh_cookies(response, refresh_token)
-
-            return response, 200
+        return response, 200
 
         return jsonify({"success": False, "error": error}), 400
 
@@ -71,19 +78,33 @@ def register():
         data = request.json
         username = data['username']
         password = data['password']
+        email = data['email']
         db = get_db()
         error = None
+        
+        
+        # Check if the username is already taken
+        # Check if the email is already taken
+        
         
         if not username:
             error = 'Username is required.'
         elif not password:
             error = 'Password is required'
+        elif not email:
+            error = 'Email is required'
+            
+        try:
+            valid = validate_email(email)
+            email = valid.email  # replace with normalized email (e.g., lowercased)
+        except EmailNotValidError as e:
+            return jsonify({'error': str(e)}), 400
         
         if error is None:
             try:
                 db.execute(
-                    "INSERT INTO user (username, password) VALUES (?, ?)", 
-                    (username, generate_password_hash(password))
+                    "INSERT INTO user (username, password, email) VALUES (?, ?, ?)", 
+                    (username, generate_password_hash(password), email)
                 )
                 db.commit()
             except db.IntegrityError:
