@@ -26,7 +26,7 @@ def subscribe():
         'INSERT INTO subscribers (user_id, email) VALUES (?, ?)', (user_id, user['email'])
     )
     db.execute(
-        'UPDATE user SET is_subscribed = 1 WHERE id = ?', (user_id,)
+        'UPDATE user SET isSubscribed = 1 WHERE id = ?', (user_id,)
     )
     db.commit()
     return jsonify({"success": True, "message": "User subscribed successfully"}), 200
