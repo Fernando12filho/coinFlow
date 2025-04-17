@@ -34,7 +34,6 @@ def get_bitcoin_price():
         return None
       
 #getting user investments
-@jwt_required()
 def get_user_investments(user_id):
     print("user id is:", user_id)
     db = get_db() 
@@ -168,13 +167,6 @@ def create_investment():
     investment_amount = data['investment_amount']
     crypto_amount = data['crypto_amount']
     investment_date = data['investment_date']  # Expecting "DD/MM/YYYY"
-
-    # Convert date to ISO format ("YYYY-MM-DD") for SQLite
-    # try:
-    #     purchase_date = validate_iso_date(investment_date['investment_date'])
-    #     print("Date Formated: ", purchase_date)
-    # except ValueError as e:
-    #     return jsonify({"error": str(e)}), 400
     
     user = get_jwt_identity()
 
@@ -185,28 +177,35 @@ def create_investment():
         (user, coin_name, crypto_amount, investment_date, investment_amount)
     )
     db.commit()
-    db.close()
-    
+    # db.close()
+    update_investment = get_user_investments(user)
     print('Investment added successfully')
     print(coin_name)
 
-    return jsonify({"success": True, "message": "Investment added successfully"}), 200
+    return jsonify({"success": True, "message": "Investment added successfully", "investments": update_investment}), 200
   
   
-@bp.route('/delete/<int:id>', methods=["DELETE", "OPTIONS"])
+@bp.route('/delete/<int:id>', methods=["DELETE"])
 @jwt_required()
 def delete_investment(id):
     print("transaction id to be deleted is", id)
     db = get_db()
-
-    db.execute(
-        'DELETE FROM investments WHERE id = ?',
-        (id,)
-    )
-    db.commit()
-    db.close()
+    cursor = db.cursor()
+    query = '''
+    DELETE FROM investments WHERE id = ?
+    '''
+    cursor.execute(query, (id,))
+    current_user = get_jwt_identity()
+    # db.execute(
+    #     'DELETE FROM investments WHERE id = ?',
+    #     (id,)
+    # )
+    # db.commit()
+    # db.close()
+    
+    update_investment = get_user_investments(current_user)
     print(f"Deleted investment with ID: {id}")
-    return jsonify({"success": True, "message": "Investment deleted"}), 200
+    return jsonify({"success": True, "message": "Investment deleted", "investments": update_investment}), 200
     
 
 @bp.post('/update')

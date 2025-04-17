@@ -157,7 +157,7 @@ def refresh():
     response = jsonify({
         "msg": "login successful",
         "access_token": new_access_token,
-        "user": user_info
+        "user": user_info,       
     })
     
     set_access_cookies(response, new_access_token)
