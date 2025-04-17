@@ -47,7 +47,7 @@ def login():
                 "username": user['username'],
                 "email": user['email'],
                 # is_subscribed
-                "isSubscribed": user['isSubscribed']                  
+                "is_subscribed": user['is_subscribed'] # default to False if not present                 
             }
         })
 
@@ -63,8 +63,6 @@ def login():
         # set_refresh_cookies(response, refresh_token)
 
         return response, 200
-
-        return jsonify({"success": False, "error": error}), 400
 
     if request.method == 'OPTIONS':
         return jsonify({"message": "Preflight request"}), 200
@@ -123,7 +121,28 @@ def logout():
     session.clear()
     return resp, 200
 
+def get_current_user_info():
+    username = get_jwt_identity()
+    if username is None:
+        return None
+    print("User not found: ", username)
+    db = get_db()
+    user = db.execute(
+        'SELECT * FROM user WHERE id = ?', (username,)
+    ).fetchone()
+    
+    print("User found: ", user)
 
+    if user is None:
+        return None
+
+    return {
+        "id": user['id'],
+        "username": user['username'],
+        "email": user['email'],
+        "is_subscribed": user['is_subscribed' ] # default to False
+    }
+    
 @bp.route('/refresh', methods=['GET'])
 @jwt_required()
 def refresh():
@@ -131,13 +150,17 @@ def refresh():
     identity = get_jwt_identity()
     new_access_token = create_access_token(identity=identity)
     
+    user_info = get_current_user_info()
+    if not user_info:
+        return jsonify({"error": "User not found"}), 404
+
     response = jsonify({
         "msg": "login successful",
-        "access_token": new_access_token,  # optional if you return access token in JSON
+        "access_token": new_access_token,
+        "user": user_info
     })
     
     set_access_cookies(response, new_access_token)
-    # set_refresh_cookies(response, refresh_token)
     return response, 200
     
     

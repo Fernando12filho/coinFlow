@@ -9,6 +9,7 @@ from flaskr.db import get_db
 from flask import request
 import requests
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from datetime import datetime
 
 
 bp = Blueprint('home', __name__)
@@ -19,14 +20,18 @@ api_key = os.getenv("API_KEY")
 
 #gets bitcoin price
 def get_bitcoin_price():
-        api_url = "https://api.coincap.io/v2/assets/bitcoin"
-        headers = {"Authorization": f"Bearer {api_key}"}
+    api_url = "https://rest.coincap.io/v3/assets/bitcoin"  # Updated API URL
+    headers = {"Authorization": f"Bearer {api_key}"}
+    try:
         response = requests.get(api_url, headers=headers)   
         if response.status_code == 200:
-            data = response.json()
-            return data
+            return response.json()
         else:
+            print(f"Error fetching BTC price: {response.status_code}")
             return None
+    except Exception as e:
+        print(f"Exception fetching BTC price: {e}")
+        return None
       
 #getting user investments
 @jwt_required()
@@ -42,7 +47,6 @@ def get_user_investments(user_id):
     '''
     cursor.execute(query, (user_id,))
     investments = cursor.fetchall()
-    print(investments)
     
     investments = [dict(row) for row in investments]
     calculate_gain_losses(investments)
@@ -90,6 +94,7 @@ def calculate_gain_losses(investments):
             db.commit()  # Commit the changes after the loop
         
     else:
+        
         print("Error fetching Bitcoin price")
         
 # Set current investments value
@@ -108,13 +113,19 @@ def calculate_btc_amount(investments):
     print("total amount of bitcoin: ", total_btc_amount) 
     return total_btc_amount   
 
+def validate_iso_date(date_str):
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        raise ValueError("Date must be in format YYYY-MM-DD")
+
 #sends all data needed to the frontend
 @bp.get('/')
 @jwt_required()
 def index(): 
     print("inside index route")
     current_user = get_jwt_identity()     
-    investments_made = [dict(row) for row in get_user_investments(current_user)]
+    investments_made = get_user_investments(current_user)
     #calculate_gain_losses(investments_made)
     total_invested = get_total_invested(investments_made)
     total_investment_value = calculate_investments_value(investments_made)
@@ -149,34 +160,37 @@ def index_brl():
 @bp.post('/create')
 @jwt_required()
 def create_investment():
-
-    #TODO: Profit/loss calculates only after re-render  
     print('Inside create route')
     data = request.json
-    #coin_name, investment_amount in dollars, cryptocurrency_amount (amount in bitcoin / sathoshis), purchase_date
+
+    # Extract data
     coin_name = data['coin_name']
     investment_amount = data['investment_amount']
     crypto_amount = data['crypto_amount']
-    investment_date = data['investment_date']
-    error = None
+    investment_date = data['investment_date']  # Expecting "DD/MM/YYYY"
+
+    # Convert date to ISO format ("YYYY-MM-DD") for SQLite
+    # try:
+    #     purchase_date = validate_iso_date(investment_date['investment_date'])
+    #     print("Date Formated: ", purchase_date)
+    # except ValueError as e:
+    #     return jsonify({"error": str(e)}), 400
+    
     user = get_jwt_identity()
+
+    db = get_db()
+    db.execute(
+        'INSERT INTO investments (user_id, coin_name, amount, purchase_date, purchase_price) '
+        'VALUES (?, ?, ?, ?, ?)',
+        (user, coin_name, crypto_amount, investment_date, investment_amount)
+    )
+    db.commit()
+    db.close()
     
-    
-    if error is not None:
-        print(error)
-        return jsonify({"success": False, "error": error}), 400
-    else:
-        db = get_db()
-        db.execute(
-            'INSERT INTO investments (user_id, coin_name, amount, purchase_date, purchase_price)'
-            'VALUES (?, ?, ?, ?, ?)',
-            (user, coin_name, crypto_amount, investment_date, investment_amount)
-        )
-        db.commit()
-        db.close()
-        print('Investment added sucessfully')
-        print(coin_name)
-        return jsonify({"success": True, "message": "Investment added successfully"}), 201
+    print('Investment added successfully')
+    print(coin_name)
+
+    return jsonify({"success": True, "message": "Investment added successfully"}), 200
   
   
 @bp.route('/delete/<int:id>', methods=["DELETE", "OPTIONS"])

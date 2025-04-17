@@ -11,6 +11,9 @@ flaskr/__pycache__/
 
 # Environment Variables
 .env
+env
+/.env
+flaskr/.env
 
 # Database Files
 *.sqlite3
