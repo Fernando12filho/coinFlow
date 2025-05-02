@@ -12,7 +12,7 @@ secret_key = os.getenv("SECRET_KEY")
 
 def create_app(test_config = None):
     app = Flask(__name__, instance_relative_config=True)
-    CORS(app, supports_credentials=True)
+    CORS(app, supports_credentials=True, Access_Control_Allow_Origin='*')
     app.config.from_mapping(
         SECRET_KEY=secret_key,
         DATABASE=os.path.join(os.getcwd(), 'flaskr.sqlite'),
