@@ -6,7 +6,8 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flaskr.db import get_db
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required, set_access_cookies, set_refresh_cookies, create_refresh_token, unset_jwt_cookies
-from email_validator import validate_email, EmailNotValidError
+from email_validator import validate_email as email_validate, EmailNotValidError
+from flaskr.validators import validate_username, validate_password, validate_email
 
 bp = Blueprint('auth', __name__, url_prefix = '/auth')
 CORS(bp, origins=["http://localhost:3000"], supports_credentials=True)
@@ -71,48 +72,78 @@ def login():
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register(): 
+    """
+    Register a new user with validation.
+    Prevents SQL injection and enforces strong passwords.
+    """
     print("inside register route")
+    
     if request.method == 'POST':
-        data = request.json
-        username = data['username']
-        password = data['password']
-        email = data['email']
-        db = get_db()
-        error = None
-        
-        
-        # Check if the username is already taken
-        # Check if the email is already taken
-        
-        
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required'
-        elif not email:
-            error = 'Email is required'
-            
         try:
-            valid = validate_email(email)
-            email = valid.email  # replace with normalized email (e.g., lowercased)
-        except EmailNotValidError as e:
-            return jsonify({'error': str(e)}), 400
-        
-        if error is None:
-            try:
-                db.execute(
-                    "INSERT INTO user (username, password, email) VALUES (?, ?, ?)", 
-                    (username, generate_password_hash(password), email)
-                )
-                db.commit()
-            except db.IntegrityError:
-                return jsonify({"success": False, "error": error}), 400
-            else:
-                return jsonify({"success": True, "message": "Registration complete"})
+            data = request.json
             
-        return jsonify({"success": False, "error": "Not Registered"}), 400
+            if not data:
+                return jsonify({"success": False, "error": "No data provided"}), 400
+            
+            username = data.get('username', '').strip()
+            password = data.get('password', '')
+            email = data.get('email', '').strip()
+            
+            # Validate username
+            is_valid, error = validate_username(username)
+            if not is_valid:
+                return jsonify({'success': False, 'error': error}), 400
+            
+            # Validate password
+            is_valid, error = validate_password(password)
+            if not is_valid:
+                return jsonify({'success': False, 'error': error}), 400
+            
+            # Validate email format (basic check)
+            is_valid, error = validate_email(email)
+            if not is_valid:
+                return jsonify({'success': False, 'error': error}), 400
+            
+            # Validate email with email_validator library
+            try:
+                valid = email_validate(email)
+                email = valid.email  # Normalized email
+            except EmailNotValidError as e:
+                return jsonify({'success': False, 'error': str(e)}), 400
+            
+            db = get_db()
+            
+            # Check if username already exists
+            existing_user = db.execute(
+                'SELECT id FROM user WHERE username = ?', (username,)
+            ).fetchone()
+            
+            if existing_user:
+                return jsonify({"success": False, "error": "Username already taken"}), 400
+            
+            # Check if email already exists
+            existing_email = db.execute(
+                'SELECT id FROM user WHERE email = ?', (email,)
+            ).fetchone()
+            
+            if existing_email:
+                return jsonify({"success": False, "error": "Email already registered"}), 400
+            
+            # Insert new user
+            db.execute(
+                "INSERT INTO user (username, password, email) VALUES (?, ?, ?)", 
+                (username, generate_password_hash(password), email)
+            )
+            db.commit()
+            
+            return jsonify({"success": True, "message": "Registration complete"}), 201
+            
+        except Exception as e:
+            print(f"Registration error: {str(e)}")
+            return jsonify({"success": False, "error": "Registration failed"}), 500
+    
     else:
-        return jsonify({"success": False, "error": "Method not allowed"})
+        return jsonify({"success": False, "error": "Method not allowed"}), 405
 
 @bp.post('/logout')
 def logout():
